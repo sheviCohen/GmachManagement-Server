@@ -15,6 +15,7 @@
 | Gmach.Service | לוגיקה עסקית, ‏AutoMapper, ‏JWT, ‏BCrypt |
 | Gmach.API | ‏Controllers, ‏Middleware, ‏Swagger, ‏NLog |
 | Gmach.Tests | ‏xUnit + Moq + SQLite בזיכרון |
+| GmachManagement-Client | ‏React (ריפוזיטורי נפרד) |
 
 ## המשאב המוגבל והטיפול במקביליות
 ההלוואה היא המשאב המוגבל: רק לקוח אחד יכול לתפוס אותה. מחזור החיים: `Available → Reserved → Active → AwaitingRenewal → Available`.
@@ -29,7 +30,7 @@
 ```
 dotnet user-secrets init --project Gmach.API
 dotnet user-secrets set "ConnectionStrings:GmachDb" "Host=localhost;Port=5432;Database=gmach;Username=postgres;Password=YOUR_PASSWORD" --project Gmach.API
-dotnet user-secrets set "Jwt:Key" "מפתח-אקראי-באורך-32-תווים-לפחות" --project Gmach.API
+dotnet user-secrets set "Jwt:Key" "any-random-text-of-at-least-32-characters" --project Gmach.API
 dotnet user-secrets set "Seed:AdminPassword" "sC134679" --project Gmach.API
 dotnet user-secrets set "Seed:UserPassword" "sC147369" --project Gmach.API
 ```
@@ -43,7 +44,19 @@ dotnet run --project Gmach.API --launch-profile Gmach.API
 | תפקיד | אימייל | סיסמה |
 |---|---|---|
 | Admin | admin@gmach.local | sC134679 |
-| User | user@gmach.local | sC134679 |
+| User | user@gmach.local | sC147369 |
+
+## לקוח (React)
+הלקוח נמצא בריפוזיטורי נפרד: https://github.com/sheviCohen/GmachManagement-Client
+
+הרצה מקומית (השרת חייב לרוץ במקביל):
+```
+git clone https://github.com/sheviCohen/GmachManagement-Client.git
+cd GmachManagement-Client
+npm install
+npm run dev
+```
+הלקוח נפתח בכתובת http://localhost:5173, והשרת מאשר אותו דרך הגדרת `Cors:AllowedOrigins`.
 
 ## בדיקות
 ```
