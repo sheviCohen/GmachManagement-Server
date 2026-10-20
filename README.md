@@ -30,8 +30,8 @@
 dotnet user-secrets init --project Gmach.API
 dotnet user-secrets set "ConnectionStrings:GmachDb" "Host=localhost;Port=5432;Database=gmach;Username=postgres;Password=YOUR_PASSWORD" --project Gmach.API
 dotnet user-secrets set "Jwt:Key" "מפתח-אקראי-באורך-32-תווים-לפחות" --project Gmach.API
-dotnet user-secrets set "Seed:AdminPassword" "YOUR_ADMIN_PASSWORD" --project Gmach.API
-dotnet user-secrets set "Seed:UserPassword" "YOUR_USER_PASSWORD" --project Gmach.API
+dotnet user-secrets set "Seed:AdminPassword" "sC134679" --project Gmach.API
+dotnet user-secrets set "Seed:UserPassword" "sC147369" --project Gmach.API
 ```
 3. הרצה (ה-Migrations וה-Seed מתבצעים אוטומטית בעלייה):
 ```
@@ -42,8 +42,8 @@ dotnet run --project Gmach.API --launch-profile Gmach.API
 ## משתמשי דמו
 | תפקיד | אימייל | סיסמה |
 |---|---|---|
-| Admin | admin@gmach.local | הערך של `Seed:AdminPassword` |
-| User | user@gmach.local | הערך של `Seed:UserPassword` |
+| Admin | admin@gmach.local | sC134679 |
+| User | user@gmach.local | sC134679 |
 
 ## בדיקות
 ```
