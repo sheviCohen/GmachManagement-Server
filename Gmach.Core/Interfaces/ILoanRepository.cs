@@ -16,9 +16,6 @@ namespace Gmach.Core.Interfaces
             bool track,
             CancellationToken cancellationToken = default);
 
-        Task<List<Loan>> GetAvailableAsync(
-            CancellationToken cancellationToken = default);
-
         // רשימה מדופדפת עם סינון ומיון. כל הפעולות מתבצעות בבסיס הנתונים.
         // status = הסינון בפועל לפי מצב (ה-Service קובע אותו לפי התפקיד).
         Task<(List<Loan> Items, int TotalCount)> GetPagedAsync(

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 using Gmach.Core.Entities;
+using Gmach.Core.Enums;
 using Gmach.Core.Interfaces;
 using Gmach.Data.Context;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,28 @@ namespace Gmach.Data.Repositories
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        }
+
+        public async Task<(List<User> Items, int TotalCount)> GetCustomersPagedAsync(
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            var customers = _context.Users
+                .AsNoTracking()
+                .Where(u => u.Role == UserRole.User);
+
+            var totalCount = await customers.CountAsync(cancellationToken);
+
+            var items = await customers
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ThenBy(u => u.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, totalCount);
         }
 
         public async Task AddAsync(

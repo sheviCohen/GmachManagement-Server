@@ -1,6 +1,7 @@
 using Gmach.API.Extensions;
 using Gmach.API.Models;
 using Gmach.Core.DTOs.Auth;
+using Gmach.Core.DTOs.Common;
 using Gmach.Core.DTOs.Users;
 using Gmach.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +35,20 @@ namespace Gmach.API.Controllers
             var user = await _authService.RegisterAsync(request, cancellationToken);
 
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        }
+
+        // רשימת הלקוחות (מנהל בלבד): GET /api/users?page=1&pageSize=10
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(PagedResultDto<AdminUserResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<PagedResultDto<AdminUserResponseDto>>> GetCustomers(
+            [FromQuery] UserQueryDto query,
+            CancellationToken cancellationToken)
+        {
+            return Ok(await _userService.GetCustomersAsync(query, cancellationToken));
         }
 
         // פרטי המשתמש המחובר. ה-ID נלקח מה-token, ולכן הלקוח לא צריך לדעת אותו.

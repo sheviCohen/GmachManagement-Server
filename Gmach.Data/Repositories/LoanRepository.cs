@@ -1,6 +1,7 @@
 using Gmach.Core.DTOs.Loans;
 using Gmach.Core.Entities;
 using Gmach.Core.Enums;
+using Gmach.Core.Exceptions;
 using Gmach.Core.Interfaces;
 using Gmach.Data.Context;
 using Microsoft.EntityFrameworkCore;
@@ -39,16 +40,6 @@ namespace Gmach.Data.Repositories
                 l => l.Id == id, cancellationToken);
         }
 
-        public async Task<List<Loan>> GetAvailableAsync(
-            CancellationToken cancellationToken = default)
-        {
-            return await _context.Loans
-                .AsNoTracking()
-                .Where(l => l.Status == LoanStatus.Available)
-                .OrderBy(l => l.Amount)
-                .ToListAsync(cancellationToken);
-        }
-
         public async Task<(List<Loan> Items, int TotalCount)> GetPagedAsync(
             LoanQueryDto query,
             LoanStatus? status,
@@ -59,6 +50,14 @@ namespace Gmach.Data.Repositories
 
             if (status.HasValue)
                 loans = loans.Where(l => l.Status == status.Value);
+
+            // הלוואה באיחור = פעילה ותאריך ההחזר כבר עבר (ההשוואה בבסיס הנתונים)
+            if (query.OverdueOnly)
+            {
+                var now = DateTime.UtcNow;
+                loans = loans.Where(l =>
+                    l.Status == LoanStatus.Active && l.DueDate < now);
+            }
 
             if (query.CategoryId.HasValue)
                 loans = loans.Where(l =>
@@ -118,7 +117,16 @@ namespace Gmach.Data.Repositories
         public async Task SaveChangesAsync(
             CancellationToken cancellationToken = default)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // מישהו אחר שינה את אותה שורה בין השליפה לשמירה
+                throw new ConflictException(
+                    "הנתונים השתנו בינתיים על ידי משתמש אחר. רעננו ונסו שוב.");
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Gmach.Core.DTOs.Common;
 using Gmach.Core.DTOs.Users;
 using Gmach.Core.Enums;
 using Gmach.Core.Exceptions;
@@ -15,6 +16,22 @@ namespace Gmach.Service.Services
         {
             _userRepository = userRepository;
             _mapper = mapper;
+        }
+
+        public async Task<PagedResultDto<AdminUserResponseDto>> GetCustomersAsync(
+            UserQueryDto query,
+            CancellationToken cancellationToken = default)
+        {
+            var (items, totalCount) = await _userRepository.GetCustomersPagedAsync(
+                query.Page, query.PageSize, cancellationToken);
+
+            return new PagedResultDto<AdminUserResponseDto>
+            {
+                Items = _mapper.Map<List<AdminUserResponseDto>>(items),
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = totalCount
+            };
         }
 
         public async Task<UserResponseDto> GetByIdAsync(

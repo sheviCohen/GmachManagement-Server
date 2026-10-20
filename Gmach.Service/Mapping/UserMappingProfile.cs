@@ -19,6 +19,10 @@ namespace Gmach.Service.Mapping
 
             // ישות -> תשובה. ה-Role (enum) הופך לטקסט אוטומטית.
             CreateMap<User, UserResponseDto>();
+
+            // תצוגת מנהל: אותו מיפוי + Score (אין שדה סיסמה ב-DTO, ולכן הוא לא יכול לדלוף)
+            CreateMap<User, AdminUserResponseDto>()
+                .IncludeBase<User, UserResponseDto>();
         }
     }
 }

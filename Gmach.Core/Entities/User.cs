@@ -12,13 +12,13 @@ namespace Gmach.Core.Entities
         public string PasswordHash { get; set; } = string.Empty;
         public UserRole Role { get; set; } = UserRole.User;
 
-        // ציון אמינות - גלוי למנהל בלבד. ערך גבוה = יותר איחורים.
+        // ציון אמינות - גלוי למנהל בלבד. ערך גבוה = לקוח אמין יותר.
         public int Score { get; set; } = 0;
 
         public ICollection<LoanRequest> LoanRequests { get; set; }
             = new List<LoanRequest>();
 
-        // שינוי הציון (חיובי = החמרה, שלילי = שיפור). הציון לא יורד מתחת ל-0.
+        // שינוי הציון (חיובי = שיפור, שלילי = החמרה). הציון לא יורד מתחת ל-0.
         public void ChangeScore(int delta)
         {
             Score = Math.Max(0, checked(Score + delta));

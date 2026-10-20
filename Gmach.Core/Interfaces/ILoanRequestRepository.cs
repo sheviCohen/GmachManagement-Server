@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using Gmach.Core.DTOs.LoanRequests;
 using Gmach.Core.Entities;
 
 namespace Gmach.Core.Interfaces
@@ -15,6 +10,16 @@ namespace Gmach.Core.Interfaces
             CancellationToken cancellationToken = default);
 
         Task<List<LoanRequest>> GetByUserIdAsync(
+            int userId,
+            CancellationToken cancellationToken = default);
+
+        // האם ללקוח יש בקשה ממתינה או הלוואה פעילה (בקשה מאושרת שטרם הושלמה)
+        // רשימה מדופדפת למנהל, עם פרטי הלקוח וההלוואה. הסינון והדפדוף בבסיס הנתונים.
+        Task<(List<LoanRequest> Items, int TotalCount)> GetPagedAsync(
+            LoanRequestQueryDto query,
+            CancellationToken cancellationToken = default);
+
+        Task<bool> HasOpenRequestAsync(
             int userId,
             CancellationToken cancellationToken = default);
 

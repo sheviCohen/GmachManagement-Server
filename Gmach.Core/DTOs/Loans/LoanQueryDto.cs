@@ -25,6 +25,9 @@ namespace Gmach.Core.DTOs.Loans
         // סינון לפי מצב. רלוונטי למנהל בלבד; לקוח תמיד רואה הלוואות זמינות בלבד.
         public LoanStatus? Status { get; set; }
 
+        // מנהל בלבד: הלוואות פעילות שתאריך ההחזר שלהן עבר
+        public bool OverdueOnly { get; set; } = false;
+
         public LoanSortBy SortBy { get; set; } = LoanSortBy.Amount;
 
         public bool Descending { get; set; } = false;

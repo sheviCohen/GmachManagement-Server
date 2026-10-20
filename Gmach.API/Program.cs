@@ -13,8 +13,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ---------- לוגים: NLog במקום ספקי ברירת המחדל (הגדרות ב-nlog.config) ----------
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 // ---------- בסיס נתונים ----------
 builder.Services.AddDbContext<GmachDbContext>(options =>
@@ -29,6 +34,8 @@ builder.Services.AddScoped<IRepaymentRepository, RepaymentRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ILoanRequestService, LoanRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<DbSeeder>();
 
@@ -47,6 +54,11 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key) || jwtSettings.Key.Length < 32)
         "Missing or too short configuration value 'Jwt:Key' (at least 32 characters). " +
         "Set it with user-secrets (development) or an environment variable.");
 builder.Services.AddSingleton(jwtSettings);
+
+// ---------- ניקוד אמינות (ערכים ב-appsettings, ניתנים לשינוי בלי קומפילציה) ----------
+builder.Services.AddSingleton(
+    builder.Configuration.GetSection("Scoring").Get<ScoringSettings>()
+    ?? new ScoringSettings());
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -81,6 +93,18 @@ builder.Services
         };
     });
 builder.Services.AddAuthorization();
+
+// ---------- CORS: מאפשר ללקוח ה-React (כתובת אחרת) לפנות לשרת ----------
+// הכתובות המותרות מגיעות מההגדרות (Cors:AllowedOrigins), ובפריסה ממשתנה סביבה
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Client", policy => policy
+        .WithOrigins(allowedOrigins)
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
 
 // ---------- Controllers ----------
 builder.Services.AddControllers()
@@ -147,8 +171,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ---------- ה-pipeline. הסדר חשוב! ----------
+// 0. CORS ראשון, כדי שגם תשובות שגיאה (כמו 409) יכללו את כותרות ה-CORS והדפדפן יאפשר ללקוח לקרוא אותן
+app.UseCors("Client");
+
 // 1. טיפול בשגיאות ראשון, כדי לתפוס שגיאות מכל מה שאחריו
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// 2. מזהה לכל בקשה ולוג של הבקשה, כך שכל שורה בלוג שייכת לבקשה מסוימת
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -158,7 +189,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// 2. Authentication (מי אתה?) תמיד לפני Authorization (מה מותר לך?)
+// 3. Authentication (מי אתה?) תמיד לפני Authorization (מה מותר לך?)
 app.UseAuthentication();
 app.UseAuthorization();
 

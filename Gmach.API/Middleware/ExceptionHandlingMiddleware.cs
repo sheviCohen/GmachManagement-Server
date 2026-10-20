@@ -25,6 +25,8 @@ namespace Gmach.API.Middleware
             }
             catch (GmachException ex)
             {
+                using var scope = BeginCorrelationScope(context);
+
                 var statusCode = ex switch
                 {
                     BusinessValidationException => StatusCodes.Status400BadRequest,
@@ -50,6 +52,7 @@ namespace Gmach.API.Middleware
             }
             catch (Exception ex)
             {
+                using var scope = BeginCorrelationScope(context);
                 _logger.LogError(ex, "Unhandled exception");
 
                 // בכוונה הודעה כללית: לא חושפים ללקוח פרטים פנימיים
@@ -59,5 +62,12 @@ namespace Gmach.API.Middleware
                     "אירעה שגיאה בשרת. נסי שוב מאוחר יותר.");
             }
         }
+
+        // ה-scope של CorrelationIdMiddleware כבר נסגר כשהחריגה הגיעה לכאן, לכן פותחים אותו שוב
+        private IDisposable? BeginCorrelationScope(HttpContext context)
+            => _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["CorrelationId"] = context.TraceIdentifier
+            });
     }
 }

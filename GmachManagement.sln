@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gmach.Data", "Gmach.Data\Gm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gmach.Service", "Gmach.Service\Gmach.Service.csproj", "{2D324721-3FD6-4D09-A381-D98E8946CB4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gmach.Tests", "Gmach.Tests\Gmach.Tests.csproj", "{109C69AC-A334-40DC-8C4D-589ACE86AB5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{2D324721-3FD6-4D09-A381-D98E8946CB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D324721-3FD6-4D09-A381-D98E8946CB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D324721-3FD6-4D09-A381-D98E8946CB4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{109C69AC-A334-40DC-8C4D-589ACE86AB5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{109C69AC-A334-40DC-8C4D-589ACE86AB5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{109C69AC-A334-40DC-8C4D-589ACE86AB5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{109C69AC-A334-40DC-8C4D-589ACE86AB5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
