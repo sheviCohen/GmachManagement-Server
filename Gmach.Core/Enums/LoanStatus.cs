@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Gmach.Core.Enums
 {
     public enum LoanStatus
     {
-        Available,
-        Active
+        Available,       // זמינה - מוצגת ללקוחות
+        Reserved,        // תפוסה - יש עליה בקשה ממתינה
+        Active,          // פעילה - אושרה וניתנה ללקוח
+        AwaitingRenewal  // הכסף חזר, ממתינה שהמנהל יקבע תאריך החזר חדש
     }
 }
