@@ -22,6 +22,16 @@
 
 לישות `Loan` יש שדה `Version` (Guid) שמוגדר כ-concurrency token ומוחלף בכל שמירה. אם שני לקוחות מגישים בקשה לאותה הלוואה בו-זמנית, השני מקבל `DbUpdateConcurrencyException`, שה-Repository הופך ל-`ConflictException`, וה-Middleware מחזיר **409 Conflict** עם הודעה ברורה. בנוסף, לקוח עם בקשה פתוחה או הלוואה פעילה לא יכול להגיש בקשה נוספת (409).
 
+## כתובות חיות (Render)
+| רכיב | כתובת |
+|---|---|
+| לקוח (React) | https://gmach-client.onrender.com |
+| שרת (API) + Swagger | https://gmach-api.onrender.com/swagger |
+
+להתחברות השתמשו במשתמשי הדמו שבהמשך.
+
+**שימו לב (חבילה חינמית):** השרת "נרדם" אחרי כ-15 דקות ללא פעילות, ולכן הפנייה הראשונה יכולה להימשך כדקה. מומלץ לפתוח קודם את כתובת ה-Swagger, להמתין לטעינה, ורק אז להיכנס ללקוח. בסיס הנתונים החינמי ב-Render תקף כ-30 יום.
+
 ## הרצה מקומית
 דרישות: ‏.NET 8 SDK ו-PostgreSQL.
 
@@ -57,6 +67,9 @@ npm install
 npm run dev
 ```
 הלקוח נפתח בכתובת http://localhost:5173, והשרת מאשר אותו דרך הגדרת `Cors:AllowedOrigins`.
+
+## פריסה
+השרת נפרס ב-Render כ-Web Service (Docker, לפי ה-`Dockerfile`) מול PostgreSQL של Render; הלקוח נפרס כ-Static Site. ההגדרות הרגישות (מחרוזת חיבור, מפתח JWT, סיסמאות Seed) נשמרות כמשתני סביבה ב-Render ולא בקוד, למשל `ConnectionStrings__GmachDb`, ‏`Jwt__Key`, ‏`Cors__AllowedOrigins__0` (כתובת הלקוח).
 
 ## בדיקות
 ```
