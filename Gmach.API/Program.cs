@@ -181,13 +181,19 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
-if (app.Environment.IsDevelopment())
+// Swagger פעיל בפיתוח, ובפריסה אם מגדירים Swagger__Enabled=true (כדי שהמורה יוכל לנסות את ה-API)
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// בפריסה (Render) ה-HTTPS מסתיים בשרת הקדמי של Render, והאפליקציה מקבלת HTTP פנימי.
+// לכן ההפניה ל-HTTPS נשארת רק בפיתוח המקומי.
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // 3. Authentication (מי אתה?) תמיד לפני Authorization (מה מותר לך?)
 app.UseAuthentication();

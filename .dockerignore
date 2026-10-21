@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/logs/
+.git/
+.vs/
+gmach-client/
+Gmach.Tests/
+*.md
