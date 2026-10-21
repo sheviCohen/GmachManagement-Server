@@ -15,7 +15,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NLog.Web;
 
+// שורת אבחון: מופיעה בלוג של Render מיד עם עליית התהליך (לא כוללת סודות)
+Console.WriteLine($"[startup] Gmach API starting. PORT={Environment.GetEnvironmentVariable("PORT") ?? "(none)"}");
+
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine($"[startup] Connection string configured: {!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("GmachDb"))}");
 
 // ---------- לוגים: NLog במקום ספקי ברירת המחדל (הגדרות ב-nlog.config) ----------
 builder.Logging.ClearProviders();
@@ -161,14 +165,27 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// מחיל migrations ויוצר נתוני התחלה (מנהל, לקוח לדוגמה, קטגוריות, הלוואות)
-using (var scope = app.Services.CreateScope())
+// מחיל migrations ויוצר נתוני התחלה (מנהל, לקוח לדוגמה, קטגוריות, הלוואות).
+// רץ ברקע מיד אחרי שהשרת התחיל להאזין, כדי שפלטפורמת הפריסה (Render) תראה פורט פתוח
+// גם כשמסד הנתונים איטי, וכדי ששגיאת חיבור תיכתב בלוג ולא תשאיר את השרת תקוע בשקט.
+app.Lifetime.ApplicationStarted.Register(() => _ = Task.Run(async () =>
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-    var seedSettings = app.Configuration.GetSection("Seed").Get<SeedSettings>()
-        ?? new SeedSettings();
-    await seeder.SeedAsync(seedSettings);
-}
+    var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+    try
+    {
+        logger.LogInformation("Applying migrations and seeding the database...");
+        using var scope = app.Services.CreateScope();
+        var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+        var seedSettings = app.Configuration.GetSection("Seed").Get<SeedSettings>()
+            ?? new SeedSettings();
+        await seeder.SeedAsync(seedSettings);
+        logger.LogInformation("Database is ready.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Database migration/seed FAILED.");
+    }
+}));
 
 // ---------- ה-pipeline. הסדר חשוב! ----------
 // 0. CORS ראשון, כדי שגם תשובות שגיאה (כמו 409) יכללו את כותרות ה-CORS והדפדפן יאפשר ללקוח לקרוא אותן
